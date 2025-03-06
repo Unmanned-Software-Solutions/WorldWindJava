@@ -803,7 +803,7 @@ public class MultiLineTextRenderer
             throw new IllegalArgumentException(msg);
         }
 
-        DrawState ds = new DrawState(renderers, this.textRenderer.getFont(), null, this.textColor);
+        DrawState ds = new DrawState(renderers, this.textRenderer, null, this.textColor);
         return getTextBoundsHTML(text, ds).getBounds();
     }
 
@@ -910,7 +910,7 @@ public class MultiLineTextRenderer
             throw new IllegalArgumentException(msg);
         }
 
-        DrawState ds = new DrawState(renderers, this.textRenderer.getFont(), null, this.textColor);
+        DrawState ds = new DrawState(renderers, this.textRenderer, null, this.textColor);
         return wrapTextHTML(text, width, height, ds);
     }
 
@@ -1068,7 +1068,7 @@ public class MultiLineTextRenderer
         }
 
         // Draw attributes
-        DrawState ds = new DrawState(renderers, this.textRenderer.getFont(), null, this.textColor);
+        DrawState ds = new DrawState(renderers, this.textRenderer, null, this.textColor);
         drawTextHTML(text, x, y, ds);
     }
 
@@ -1331,11 +1331,11 @@ public class MultiLineTextRenderer
         public TextRenderer textRenderer;
         protected Pattern SGMLPattern = Pattern.compile("(<[^\\s].*?>)");
 
-        public DrawState(TextRendererCache renderers, Font font, String hyperlink, Color color)
+        public DrawState(TextRendererCache renderers, TextRenderer textRenderer, String hyperlink, Color color)
         {
-            this.push(new DrawAttributes(font, hyperlink, color));
+            this.push(new DrawAttributes(textRenderer.getFont(), hyperlink, color));
             this.renderers = renderers;
-            this.textRenderer = getTextRenderer(font);
+            this.textRenderer = textRenderer;
         }
 
         public DrawState(DrawState ds)
