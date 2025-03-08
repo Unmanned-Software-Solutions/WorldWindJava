@@ -27,6 +27,8 @@
  */
 package gov.nasa.worldwind.render;
 
+import com.jogamp.nativewindow.NativeSurface;
+import com.jogamp.nativewindow.ScalableSurface;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.*;
 import gov.nasa.worldwind.geom.*;
@@ -164,6 +166,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
     protected java.util.Map<Object, java.awt.Rectangle> textBoundsMap;
     protected double minActiveAltitude = -Double.MAX_VALUE;
     protected double maxActiveAltitude = Double.MAX_VALUE;
+    protected AnnotationAttributes scaledAttributes = new AnnotationAttributes();
 
     protected AbstractAnnotation()
     {
@@ -217,6 +220,11 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
     public AnnotationAttributes getAttributes()
     {
         return this.attributes;
+    }
+
+    public AnnotationAttributes getScaledAttributes()
+    {
+        return this.scaledAttributes;
     }
 
     public void setAttributes(AnnotationAttributes attributes)
@@ -387,7 +395,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
         }
 
         // Clamp the caller specified size.
-        java.awt.Dimension size = new java.awt.Dimension(this.getAttributes().getSize());
+        java.awt.Dimension size = new java.awt.Dimension(this.getScaledAttributes().getSize());
         if (size.width < 1)
             size.width = 1;
         if (size.height < 0)
@@ -404,7 +412,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
         // Adjust the inset bounds to the child annotations.
         insetSize = this.adjustSizeToChildren(dc, insetSize.width, insetSize.height);
 
-        java.awt.Insets insets = this.getAttributes().getInsets();
+        java.awt.Insets insets = this.getScaledAttributes().getInsets();
         return new java.awt.Dimension(
             insetSize.width + (insets.left + insets.right),
             insetSize.height + (insets.top + insets.bottom));
@@ -748,7 +756,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
 
     protected void drawBorder(DrawContext dc, int width, int height, double opacity, Position pickPosition)
     {
-        if (this.getAttributes().getBorderWidth() <= 0)
+        if (this.getScaledAttributes().getBorderWidth() <= 0)
             return;
 
         GL2 gl = dc.getGL().getGL2(); // GL initialization checks for GL2 compatibility.
@@ -778,7 +786,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
         }
 
         // Apply line width state.
-        gl.glLineWidth((float) this.getAttributes().getBorderWidth());
+        gl.glLineWidth((float) this.getScaledAttributes().getBorderWidth());
 
         // Apply blending and color state.
         this.applyColor(dc, this.getAttributes().getBorderColor(), opacity, false);
@@ -967,17 +975,17 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
 
     protected void drawCallout(DrawContext dc, int mode, int width, int height, boolean useTexCoords)
     {
-        String shape = this.getAttributes().getFrameShape();
+        String shape = this.getScaledAttributes().getFrameShape();
         if (shape == null)
             return;
 
-        java.awt.Point offset = this.getAttributes().getDrawOffset();
+        java.awt.Point offset = this.getScaledAttributes().getDrawOffset();
         java.awt.Point leaderOffset = new java.awt.Point((width / 2) - offset.x, -offset.y);
-        int leaderGapWidth = this.getAttributes().getLeaderGapWidth();
-        int cornerRadius = this.getAttributes().getCornerRadius();
+        int leaderGapWidth = this.getScaledAttributes().getLeaderGapWidth();
+        int cornerRadius = this.getScaledAttributes().getCornerRadius();
 
         java.nio.DoubleBuffer buffer = vertexBuffer;
-        if (this.getAttributes().getLeader().equals(AVKey.SHAPE_TRIANGLE))
+        if (this.getScaledAttributes().getLeader().equals(AVKey.SHAPE_TRIANGLE))
         {
             buffer = FrameFactory.createShapeWithLeaderBuffer(shape, width, height, leaderOffset, leaderGapWidth,
                 cornerRadius, buffer);
@@ -1066,7 +1074,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
     protected String getWrappedText(DrawContext dc, int width, int height, String text, java.awt.Font font,
         String align)
     {
-        Object key = new TextCacheKey(width, height, text, font, align);
+        Object key = new TextCacheKey(width, height, text, font, align, OGLTextRenderer.getScaleFactor());
         String wrappedText = this.wrappedTextMap.get(key);
         if (wrappedText == null)
         {
@@ -1079,7 +1087,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
 
     protected java.awt.Rectangle getTextBounds(DrawContext dc, String text, java.awt.Font font, String align)
     {
-        Object key = new TextCacheKey(0, 0, text, font, align);
+        Object key = new TextCacheKey(0, 0, text, font, align, OGLTextRenderer.getScaleFactor());
         java.awt.Rectangle bounds = this.textBoundsMap.get(key);
         if (bounds == null)
         {
@@ -1138,6 +1146,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
         private final String text;
         private final java.awt.Font font;
         private final String align;
+        private final float scaleFactor;
 
         public TextCacheKey(int width, int height, String text, java.awt.Font font, String align)
         {
@@ -1146,6 +1155,17 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
             this.text = text;
             this.font = font;
             this.align = align;
+            this.scaleFactor = 1f;
+        }
+
+        public TextCacheKey(int width, int height, String text, java.awt.Font font, String align, float scaleFactor)
+        {
+            this.width = width;
+            this.height = height;
+            this.text = text;
+            this.font = font;
+            this.align = align;
+            this.scaleFactor = scaleFactor;
         }
 
         public boolean equals(Object o)
@@ -1160,7 +1180,8 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
                 && (this.height == that.height)
                 && (this.align.equals(that.align))
                 && (this.text != null ? this.text.equals(that.text) : that.text == null)
-                && (this.font != null ? this.font.equals(that.font) : that.font == null);
+                && (this.font != null ? this.font.equals(that.font) : that.font == null)
+                    && (this.scaleFactor == that.scaleFactor);
         }
 
         public int hashCode()
@@ -1170,6 +1191,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
             result = 31 * result + (this.text != null ? this.text.hashCode() : 0);
             result = 31 * result + (this.font != null ? this.font.hashCode() : 0);
             result = 31 * result + (this.align != null ? this.align.hashCode() : 0);
+            result = 31 * result + Float.floatToIntBits(scaleFactor);
             return result;
         }
     }
@@ -1182,7 +1204,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
     {
         // TODO: factor in border width?
 
-        java.awt.Insets insets = this.getAttributes().getInsets();
+        java.awt.Insets insets = this.getScaledAttributes().getInsets();
         int insetWidth = width - (insets.left + insets.right);
         int insetHeight = height - (insets.bottom + insets.top);
 
@@ -1385,4 +1407,77 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
         if (booleanState != null)
             setAlwaysOnTop(booleanState);
     }
+
+    public void computeScaledAttributes() {
+        AnnotationAttributes regularAttributes = getAttributes();
+        AnnotationAttributes scaledAttributes = new AnnotationAttributes();
+
+        scaledAttributes.setDefaults(regularAttributes);
+        scaledAttributes.setFrameShape(regularAttributes.getFrameShape());
+        scaledAttributes.setScale(regularAttributes.getScale());
+        scaledAttributes.setOpacity(regularAttributes.getOpacity());
+        scaledAttributes.setLeader(regularAttributes.getLeader());
+        scaledAttributes.setLeaderGapWidth(regularAttributes.getLeaderGapWidth());
+        scaledAttributes.setAdjustWidthToText(regularAttributes.getAdjustWidthToText());
+        scaledAttributes.setHighlighted(regularAttributes.isHighlighted());
+        scaledAttributes.setHighlightScale(regularAttributes.getHighlightScale());
+        scaledAttributes.setVisible(regularAttributes.isVisible());
+        scaledAttributes.setFont(regularAttributes.getFont());
+        scaledAttributes.setTextAlign(regularAttributes.getTextAlign());
+        scaledAttributes.setTextColor(regularAttributes.getTextColor());
+        scaledAttributes.setBackgroundColor(regularAttributes.getBackgroundColor());
+        scaledAttributes.setBorderColor(regularAttributes.getBorderColor());
+        scaledAttributes.setBorderStippleFactor(regularAttributes.getBorderStippleFactor());
+        scaledAttributes.setBorderStipplePattern(regularAttributes.getBorderStipplePattern());
+        scaledAttributes.setAntiAliasHint(regularAttributes.getAntiAliasHint());
+        scaledAttributes.setImageSource(regularAttributes.getImageSource());
+        scaledAttributes.setImageScale(regularAttributes.getImageScale());
+        scaledAttributes.setImageOffset(regularAttributes.getImageOffset());
+        scaledAttributes.setImageOpacity(regularAttributes.getImageOpacity());
+        scaledAttributes.setImageRepeat(regularAttributes.getImageRepeat());
+        scaledAttributes.setDistanceMinScale(regularAttributes.getDistanceMinScale());
+        scaledAttributes.setDistanceMaxScale(regularAttributes.getDistanceMaxScale());
+        scaledAttributes.setDistanceMinOpacity(regularAttributes.getDistanceMinOpacity());
+        scaledAttributes.setEffect(regularAttributes.getEffect());
+        scaledAttributes.setUnresolved(regularAttributes.unresolved);
+
+        float scaleFactor = getScaleFactor();
+
+        // Scaling the specified fields
+        if (regularAttributes.getSize() != null) {
+            scaledAttributes.setSize(new Dimension(scaleInt(regularAttributes.getSize().width, scaleFactor), scaleInt(regularAttributes.getSize().height, scaleFactor)));
+        }
+        scaledAttributes.setCornerRadius(scaleInt(regularAttributes.getCornerRadius(), scaleFactor));
+        if (regularAttributes.getInsets() != null) {
+            scaledAttributes.setInsets(new Insets(
+                    scaleInt(regularAttributes.getInsets().top, scaleFactor),
+                    scaleInt(regularAttributes.getInsets().left, scaleFactor),
+                    scaleInt(regularAttributes.getInsets().bottom, scaleFactor),
+                    scaleInt(regularAttributes.getInsets().right, scaleFactor)
+            ));
+        }
+        if (regularAttributes.getDrawOffset() != null) {
+            scaledAttributes.setDrawOffset(new Point(scaleInt(regularAttributes.getDrawOffset().x, scaleFactor), scaleInt(regularAttributes.getDrawOffset().y, scaleFactor)));
+        }
+        scaledAttributes.setBorderWidth(regularAttributes.getBorderWidth() * scaleFactor);
+
+        this.scaledAttributes = scaledAttributes;
+    }
+
+    public static float getScaleFactor() {
+        NativeSurface surface = GLContext.getCurrent().getGLDrawable().getNativeSurface();
+        if (surface instanceof ScalableSurface) {
+            // DPI scaling for surface
+            float[] surfaceScale = new float[2];
+            ((ScalableSurface) surface).getCurrentSurfaceScale(surfaceScale);
+            return surfaceScale[0];
+        } else {
+            return 1f;
+        }
+    }
+
+    private int scaleInt(int value, float factor) {
+        return Math.round(value * factor);
+    }
+
 }

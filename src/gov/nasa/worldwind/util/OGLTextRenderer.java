@@ -27,6 +27,9 @@
  */
 package gov.nasa.worldwind.util;
 
+import com.jogamp.nativewindow.NativeSurface;
+import com.jogamp.nativewindow.ScalableSurface;
+import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.util.awt.TextRenderer;
 
 import gov.nasa.worldwind.render.*;
@@ -116,7 +119,7 @@ public class OGLTextRenderer extends TextRenderer
         }
 
         TextRendererCache.CacheKey key = new TextRendererCache.CacheKey(font, antialiased, useFractionalMetrics,
-            mipmap);
+            mipmap, getScaleFactor());
 
         TextRenderer value = cache.get(key);
         if (value == null)
@@ -126,6 +129,18 @@ public class OGLTextRenderer extends TextRenderer
         }
 
         return value;
+    }
+
+    public static float getScaleFactor() {
+        NativeSurface surface = GLContext.getCurrent().getGLDrawable().getNativeSurface();
+        if (surface instanceof ScalableSurface) {
+            // DPI scaling for surface
+            float[] surfaceScale = new float[2];
+            ((ScalableSurface) surface).getCurrentSurfaceScale(surfaceScale);
+            return surfaceScale[0];
+        } else {
+            return 1f;
+        }
     }
 
     public static TextRenderer getOrCreateTextRenderer(TextRendererCache cache, java.awt.Font font)

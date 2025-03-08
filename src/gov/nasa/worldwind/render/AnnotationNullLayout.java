@@ -149,7 +149,12 @@ public class AnnotationNullLayout extends AbstractAnnotationLayout
         if (size == null)
             return null;
 
-        java.awt.Point offset = annotation.getAttributes().getDrawOffset();
+        java.awt.Point offset;
+        if (annotation instanceof AbstractAnnotation) {
+            offset = ((AbstractAnnotation) annotation).getScaledAttributes().getDrawOffset();
+        } else {
+            offset = annotation.getAttributes().getDrawOffset();
+        }
         if (offset == null)
             offset = new java.awt.Point();
 

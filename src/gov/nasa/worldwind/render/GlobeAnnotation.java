@@ -316,7 +316,7 @@ public class GlobeAnnotation extends AbstractAnnotation implements Locatable, Mo
         java.awt.Dimension size = this.getPreferredSize(dc);
         double[] scaleAndOpacity = computeDistanceScaleAndOpacity(dc, point, size);
         double finalScale = scaleAndOpacity[0] * this.computeScale(dc);
-        java.awt.Point offset = this.getAttributes().getDrawOffset();
+        java.awt.Point offset = this.getScaledAttributes().getDrawOffset();
 
         double offsetX = offset.x * finalScale;
         double offsetY = offset.y * finalScale;
@@ -346,6 +346,8 @@ public class GlobeAnnotation extends AbstractAnnotation implements Locatable, Mo
         Vec4 screenPoint = dc.getView().project(point);
         if (screenPoint == null)
             return;
+
+        computeScaledAttributes();
 
         java.awt.Dimension size = this.getPreferredSize(dc);
         Position pos = dc.getGlobe().computePositionFromPoint(point);

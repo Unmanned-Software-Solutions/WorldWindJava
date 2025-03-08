@@ -46,6 +46,7 @@ public class TextRendererCache implements Disposable
         private final boolean antialiased;
         private final boolean useFractionalMetrics;
         private final boolean mipmap;
+        private final float scaleFactor;
 
         public CacheKey(java.awt.Font font, boolean antialiased, boolean useFractionalMetrics, boolean mipmap)
         {
@@ -60,6 +61,23 @@ public class TextRendererCache implements Disposable
             this.antialiased = antialiased;
             this.useFractionalMetrics = useFractionalMetrics;
             this.mipmap = mipmap;
+            this.scaleFactor = 1.0f;
+        }
+
+        public CacheKey(java.awt.Font font, boolean antialiased, boolean useFractionalMetrics, boolean mipmap, float scaleFactor)
+        {
+            if (font == null)
+            {
+                String message = Logging.getMessage("nullValue.FontIsNull");
+                Logging.logger().severe(message);
+                throw new IllegalArgumentException(message);
+            }
+
+            this.font = font;
+            this.antialiased = antialiased;
+            this.useFractionalMetrics = useFractionalMetrics;
+            this.mipmap = mipmap;
+            this.scaleFactor = scaleFactor;
         }
 
         public final java.awt.Font getFont()
@@ -94,7 +112,7 @@ public class TextRendererCache implements Disposable
             return (this.antialiased == that.antialiased)
                 && (this.useFractionalMetrics == that.useFractionalMetrics)
                 && (this.mipmap == that.mipmap)
-                && (this.font.equals(that.font));
+                && (this.font.equals(that.font)) && (this.scaleFactor == that.scaleFactor);
         }
 
         public int hashCode()
@@ -103,6 +121,7 @@ public class TextRendererCache implements Disposable
             result = 31 * result + (this.antialiased ? 1 : 0);
             result = 31 * result + (this.useFractionalMetrics ? 1 : 0);
             result = 31 * result + (this.mipmap ? 1 : 0);
+            result = 31 * result + Float.floatToIntBits(scaleFactor);
             return result;
         }
     }
