@@ -27,8 +27,6 @@
  */
 package gov.nasa.worldwind.render;
 
-import com.jogamp.nativewindow.NativeSurface;
-import com.jogamp.nativewindow.ScalableSurface;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.*;
 import gov.nasa.worldwind.geom.*;
@@ -1074,7 +1072,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
     protected String getWrappedText(DrawContext dc, int width, int height, String text, java.awt.Font font,
         String align)
     {
-        Object key = new TextCacheKey(width, height, text, font, align, OGLTextRenderer.getScaleFactor());
+        Object key = new TextCacheKey(width, height, text, font, align, dc.getScaleFactor());
         String wrappedText = this.wrappedTextMap.get(key);
         if (wrappedText == null)
         {
@@ -1087,7 +1085,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
 
     protected java.awt.Rectangle getTextBounds(DrawContext dc, String text, java.awt.Font font, String align)
     {
-        Object key = new TextCacheKey(0, 0, text, font, align, OGLTextRenderer.getScaleFactor());
+        Object key = new TextCacheKey(0, 0, text, font, align, dc.getScaleFactor());
         java.awt.Rectangle bounds = this.textBoundsMap.get(key);
         if (bounds == null)
         {
@@ -1408,7 +1406,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
             setAlwaysOnTop(booleanState);
     }
 
-    public void computeScaledAttributes() {
+    public void computeScaledAttributes(float scaleFactor) {
         AnnotationAttributes regularAttributes = getAttributes();
         AnnotationAttributes scaledAttributes = new AnnotationAttributes();
 
@@ -1441,8 +1439,6 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
         scaledAttributes.setEffect(regularAttributes.getEffect());
         scaledAttributes.setUnresolved(regularAttributes.unresolved);
 
-        float scaleFactor = getScaleFactor();
-
         // Scaling the specified fields
         if (regularAttributes.getSize() != null) {
             scaledAttributes.setSize(new Dimension(scaleInt(regularAttributes.getSize().width, scaleFactor), scaleInt(regularAttributes.getSize().height, scaleFactor)));
@@ -1462,18 +1458,6 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
         scaledAttributes.setBorderWidth(regularAttributes.getBorderWidth() * scaleFactor);
 
         this.scaledAttributes = scaledAttributes;
-    }
-
-    public static float getScaleFactor() {
-        NativeSurface surface = GLContext.getCurrent().getGLDrawable().getNativeSurface();
-        if (surface instanceof ScalableSurface) {
-            // DPI scaling for surface
-            float[] surfaceScale = new float[2];
-            ((ScalableSurface) surface).getCurrentSurfaceScale(surfaceScale);
-            return surfaceScale[0];
-        } else {
-            return 1f;
-        }
     }
 
     private int scaleInt(int value, float factor) {

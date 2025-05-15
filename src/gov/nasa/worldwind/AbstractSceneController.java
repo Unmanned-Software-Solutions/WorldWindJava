@@ -459,6 +459,7 @@ public abstract class AbstractSceneController extends WWObjectImpl implements Sc
             this.framesPerSecond = frame * 1000d / (time - timebase);
             this.timebase = time;
             this.frame = 0;
+            this.dc.updateScaleFactor();
         }
         this.dc.setPerFrameStatistic(PerformanceStatistic.FRAME_TIME, "Frame Time (ms)", (int) this.frameTime);
         this.dc.setPerFrameStatistic(PerformanceStatistic.FRAME_RATE, "Frame Rate (fps)", (int) this.framesPerSecond);

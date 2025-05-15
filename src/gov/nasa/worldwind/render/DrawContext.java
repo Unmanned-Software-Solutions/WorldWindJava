@@ -1058,4 +1058,16 @@ public interface DrawContext extends WWObject, Disposable
      * @return
      */
     public Point glPointToAwtPoint(Point glPoint);
+
+    /**
+     * Updates the scale factor for the current context or application.
+     */
+    public void updateScaleFactor();
+
+    /**
+     * Retrieves the scale factor for the current context.
+     *
+     * @return the scale factor as a floating-point value
+     */
+    public float getScaleFactor();
 }

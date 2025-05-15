@@ -1015,6 +1015,10 @@ public class PointPlacemark extends WWObjectImpl
             else
                 yscale = this.activeTexture.getHeight(dc);
 
+            float sf = dc.getScaleFactor();
+            xscale *= sf;
+            yscale *= sf;
+
             // Calculate maximum possible depth value in case of rectangle is tilted on 90 degree and rotated on 45
             double maxDepth = Math.max(xscale, yscale) * 1.42;
 
@@ -1650,9 +1654,9 @@ public class PointPlacemark extends WWObjectImpl
     protected void computeImageBounds(DrawContext dc, OrderedPlacemark opm)
     {
         double s = this.getActiveAttributes().getScale() != null ? this.getActiveAttributes().getScale() : 1;
-
-        double width = s * (this.activeTexture != null ? this.activeTexture.getWidth(dc) : 1);
-        double height = s * (this.activeTexture != null ? this.activeTexture.getHeight(dc) : 1);
+        float sf = dc.getScaleFactor();
+        double width = s * (this.activeTexture != null ? this.activeTexture.getWidth(dc) : 1) * sf;
+        double height = s * (this.activeTexture != null ? this.activeTexture.getHeight(dc) : 1) * sf;
 
         double x = opm.screenPoint.x + (this.isDrawPoint(dc) ? -0.5 * s : this.dx);
         double y = opm.screenPoint.y + (this.isDrawPoint(dc) ? -0.5 * s : this.dy);
@@ -1682,7 +1686,8 @@ public class PointPlacemark extends WWObjectImpl
             os = DEFAULT_LABEL_OFFSET_IF_UNSPECIFIED;
         double w = this.activeTexture != null ? this.activeTexture.getWidth(dc) : 1;
         double h = this.activeTexture != null ? this.activeTexture.getHeight(dc) : 1;
-        Point.Double offset = os.computeOffset(w, h, imageScale, imageScale);
+        float sf = dc.getScaleFactor();
+        Point.Double offset = os.computeOffset(w * sf, h * sf, imageScale, imageScale);
         x += offset.x;
         y += offset.y;
 
@@ -1704,7 +1709,8 @@ public class PointPlacemark extends WWObjectImpl
 
         double w = this.activeTexture != null ? this.activeTexture.getWidth(dc) : 1;
         double h = this.activeTexture != null ? this.activeTexture.getHeight(dc) : 1;
-        Point.Double offset = os.computeOffset(w, h,
+        float sf = dc.getScaleFactor();
+        Point.Double offset = os.computeOffset(w * sf, h * sf,
             this.getActiveAttributes().getScale(), this.getActiveAttributes().getScale());
 
         this.dx = -offset.x;

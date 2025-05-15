@@ -28,6 +28,8 @@
 package gov.nasa.worldwind.render;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.nativewindow.NativeSurface;
+import com.jogamp.nativewindow.ScalableSurface;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.cache.GpuResourceCache;
@@ -116,6 +118,7 @@ public class DrawContextImpl extends WWObjectImpl implements DrawContext
     protected DeclutteringTextRenderer declutteringTextRenderer = new DeclutteringTextRenderer();
     protected ClutterFilter clutterFilter;
 //    protected Map<String, GroupingFilter> groupingFilters;
+    protected float scaleFactor = 1f;
 
     protected static class OrderedRenderableEntry
     {
@@ -685,6 +688,11 @@ public class DrawContextImpl extends WWObjectImpl implements DrawContext
         this.uniquePixelColors.clear();
 
         return array;
+    }
+
+    @Override
+    public float getScaleFactor() {
+        return this.scaleFactor;
     }
 
     @Override
@@ -1765,4 +1773,22 @@ public class DrawContextImpl extends WWObjectImpl implements DrawContext
         getGLDrawable().getNativeSurface().convertToWindowUnits(glPt);
         return new Point(glPt[0], glPt[1]);    	
     }
+
+    @Override
+    public void updateScaleFactor() {
+        NativeSurface surface = glContext.getGLDrawable().getNativeSurface();
+        if (surface instanceof ScalableSurface) {
+            scaleFactor = getSurfaceScale((ScalableSurface) surface);
+        } else {
+            scaleFactor = 1f;
+        }
+    }
+
+    private static float getSurfaceScale(ScalableSurface surface) {
+        // DPI scaling for surface
+        float[] surfaceScale = new float[2];
+        surface.getCurrentSurfaceScale(surfaceScale);
+        return surfaceScale[0];
+    }
+    
 }

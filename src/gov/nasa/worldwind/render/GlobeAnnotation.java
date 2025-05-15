@@ -347,7 +347,7 @@ public class GlobeAnnotation extends AbstractAnnotation implements Locatable, Mo
         if (screenPoint == null)
             return;
 
-        computeScaledAttributes();
+        computeScaledAttributes(dc.getScaleFactor());
 
         java.awt.Dimension size = this.getPreferredSize(dc);
         Position pos = dc.getGlobe().computePositionFromPoint(point);
