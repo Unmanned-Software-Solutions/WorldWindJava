@@ -475,7 +475,7 @@ public abstract class AbstractAnnotation extends AVListImpl implements Annotatio
     protected void applyScreenTransform(DrawContext dc, int x, int y, int width, int height, double scale)
     {
         double finalScale = scale * this.computeScale(dc);
-        java.awt.Point offset = this.getAttributes().getDrawOffset();
+        java.awt.Point offset = this.getScaledAttributes().getDrawOffset();
 
         GL2 gl = dc.getGL().getGL2(); // GL initialization checks for GL2 compatibility.
         gl.glTranslated(x, y, 0);
