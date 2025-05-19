@@ -1658,8 +1658,8 @@ public class PointPlacemark extends WWObjectImpl
         double width = s * (this.activeTexture != null ? this.activeTexture.getWidth(dc) : 1) * sf;
         double height = s * (this.activeTexture != null ? this.activeTexture.getHeight(dc) : 1) * sf;
 
-        double x = opm.screenPoint.x + (this.isDrawPoint(dc) ? -0.5 * s : this.dx);
-        double y = opm.screenPoint.y + (this.isDrawPoint(dc) ? -0.5 * s : this.dy);
+        double x = opm.screenPoint.x + (this.isDrawPoint(dc) ? -0.5 * s * sf : this.dx);
+        double y = opm.screenPoint.y + (this.isDrawPoint(dc) ? -0.5 * s * sf : this.dy);
 
         opm.imageBounds = new Rectangle((int) x, (int) y, (int) Math.ceil(width), (int) Math.ceil(height));
     }
