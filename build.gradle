@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 group = 'earth.worldwind'
-version = '2.3.1' + (project.hasProperty('snapshot') ? '-SNAPSHOT' : '')
+version = '2.3.2' + (project.hasProperty('snapshot') ? '-SNAPSHOT' : '')
 
 ant {
     property(file: 'release-build.properties')
