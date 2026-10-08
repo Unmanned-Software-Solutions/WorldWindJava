@@ -25,6 +25,11 @@
  * NASA World Wind Java (WWJ)  can be found in the WorldWindJava-v2.2 3rd-party
  * notices and licenses PDF found in code directory.
  */
+
+/*
+ * Modified by Unmanned Software Solutions, 2026: transformPixels() keeps tile images without an alpha channel opaque.
+ * See the git history of https://github.com/Unmanned-Software-Solutions/WorldWindJava for details.
+ */
 package gov.nasa.worldwind.layers.mercator;
 
 import gov.nasa.worldwind.avlist.*;

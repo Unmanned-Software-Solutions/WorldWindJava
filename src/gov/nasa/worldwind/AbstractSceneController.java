@@ -26,6 +26,11 @@
  * notices and licenses PDF found in code directory.
  */
 
+/*
+ * Modified by Unmanned Software Solutions, 2025: updates the draw context scale factor every frame.
+ * See the git history of https://github.com/Unmanned-Software-Solutions/WorldWindJava for details.
+ */
+
 package gov.nasa.worldwind;
 
 import gov.nasa.worldwind.avlist.AVKey;

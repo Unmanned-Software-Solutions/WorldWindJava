@@ -26,6 +26,11 @@
  * notices and licenses PDF found in code directory.
  */
 
+/*
+ * Modified by Unmanned Software Solutions, 2025: aligns the placemark image and label with the display scale factor.
+ * See the git history of https://github.com/Unmanned-Software-Solutions/WorldWindJava for details.
+ */
+
 package gov.nasa.worldwind.render;
 
 import gov.nasa.worldwind.*;

@@ -26,6 +26,11 @@
  * notices and licenses PDF found in code directory.
  */
 
+/*
+ * Modified by Unmanned Software Solutions, 2025: most example placemarks commented out.
+ * See the git history of https://github.com/Unmanned-Software-Solutions/WorldWindJava for details.
+ */
+
 package gov.nasa.worldwindx.examples;
 
 import gov.nasa.worldwind.*;

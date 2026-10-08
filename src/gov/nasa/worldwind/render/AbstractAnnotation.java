@@ -25,6 +25,11 @@
  * NASA World Wind Java (WWJ)  can be found in the WorldWindJava-v2.2 3rd-party
  * notices and licenses PDF found in code directory.
  */
+
+/*
+ * Modified by Unmanned Software Solutions, 2025: scales size, corner radius, insets, draw offset and border width by the display scale factor.
+ * See the git history of https://github.com/Unmanned-Software-Solutions/WorldWindJava for details.
+ */
 package gov.nasa.worldwind.render;
 
 import gov.nasa.worldwind.WorldWindow;
